@@ -1,0 +1,14 @@
+# install.ps1 的备份目录
+.backup/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
