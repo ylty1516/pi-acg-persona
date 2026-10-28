@@ -31,7 +31,8 @@ pi-acg-persona/
 ├── base/
 │   └── behavior.md       # 公共行为约定：语言、编码习惯、工具使用
 ├── personas/
-│   └── example.md        # 人设卡：一个角色一个文件，文件名就是 id
+│   ├── example.md        # 示例卡「小满」：抄格式用的
+│   └── einx.md           # 实用卡「爱因克斯」：句尾「喵」+ 双模式
 ├── persona.template.md   # 空白骨架，抄它写新卡
 ├── install.ps1           # 安装 / 切换 / 查询 / 卸载
 └── docs/                 # 设计说明
