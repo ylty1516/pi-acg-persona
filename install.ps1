@@ -109,16 +109,17 @@ function Build-Content([string]$Name) {
     $persona = ConvertTo-Lf (Read-Text $personaPath)
 
     $marker = "$script:MarkerPrefix$Name -->"
+    # 顺序有意为之：公共规范在前，人设在后。人设是角色层，放在最后才有最高的语气体感权重。
     $parts = @(
         $marker
-        ''
-        $persona
-        ''
-        '---'
         ''
         '# 公共行为约定'
         ''
         $base
+        ''
+        '---'
+        ''
+        $persona
         ''
     )
     return ($parts -join "`n")
