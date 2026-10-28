@@ -35,6 +35,7 @@ pi-acg-persona/
 ├── personas/
 │   ├── example.md        # 示例卡「小满」：抄格式用的
 │   └── einx.md           # 实用卡「爱因克斯」：句尾「喵」+ 傲娇调侃 + 语音层 + 三模式
+├── wallpaper/            # 终端背景图 + 设置脚本（可选）
 ├── persona.template.md   # 空白骨架，抄它写新卡
 ├── install.ps1           # 安装 / 切换 / 查询 / 卸载
 └── docs/                 # 设计说明
@@ -107,6 +108,34 @@ cd pi-acg-persona
 - 标记内只放人话，不放代码、命令、路径、报错
 
 这样以后加语音，只接一个正则，人设卡不用改。`personas/einx.md` 里的「语音层」那段有完整的频率和禁用场合规定。
+
+## 终端外观（可选）
+
+pi 的主题只管**颜色**，而且每个位置只能是一个单色——**背景图和渐变做不到**。这部分是 Windows Terminal 的能力，所以单独放在 `wallpaper/`：
+
+```powershell
+cd wallpaper
+.\set-background.ps1 -Show                                    # 看当前��置
+.\set-background.ps1 -Image ".\einx-wallpaper.png" -Opacity 0.20  # 设置背景图
+.\set-background.ps1 -Reset                                   # 移除背景图
+```
+
+**透明度给多少**（这个数值直接决定能不能看清字）：
+
+| 图类型 | 建议 opacity |
+|---|---|
+| 照片 / 插画壁纸 | `0.18 ~ 0.30` |
+| 纯色块 / 极简图 | `0.35 ~ 0.50` |
+
+超过 `0.35` 基本就是在跟字打架。亮色区域多的图（晚霞、白背景）要压得更低。
+
+> **为什么脚本不用 `Set-Content -Encoding UTF8`**
+>
+> PowerShell 5.1 的 `Set-Content -Encoding UTF8` 会写 BOM，而 BOM 对 JSON 解析器是非法字符。
+> `settings.json` 头部多了 `EF BB BF` 三个字节，Windows Terminal 就可能读不了自己的配置。
+> 脚本用 `UTF8Encoding($false)` 写，并且写失败会自动从备份回滚。
+
+改完要**完全关闭 Windows Terminal 再打开**，关标签页不算。
 
 ## 和 AGENTS.md 的分工
 
