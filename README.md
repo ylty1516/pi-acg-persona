@@ -34,7 +34,7 @@ pi-acg-persona/
 │   └── behavior.md       # 公共行为约定：语言、编码习惯、工具使用
 ├── personas/
 │   ├── example.md        # 示例卡「小满」：抄格式用的
-│   └── einx.md           # 实用卡「爱因克斯」：句尾「喵」+ 傲娇调侃 + 语音层 + 三模式
+│   └── einx.md           # 实用卡「爱因克斯」：主从关系 + 句尾「喵」+ 傲娇调侃 + 语音层 + 三模式
 ├── wallpaper/            # 终端背景图 + 设置脚本（可选）
 ├── persona.template.md   # 空白骨架，抄它写新卡
 ├── install.ps1           # 安装 / 切换 / 查询 / 卸载
