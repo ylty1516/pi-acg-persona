@@ -63,12 +63,14 @@ cd pi-acg-persona
 | `.\install.ps1 -List` | 列出 `personas/` 下的所有卡 |
 | `.\install.ps1 -Use <id>` | 备份现有文件 → 拼接 → 写入 |
 | `.\install.ps1 -Status` | 报告当前生效的是哪张卡 |
-| `.\install.ps1 -Uninstall` | 备份 → 删除 `APPEND_SYSTEM.md` |
+| `.\install.ps1 -Uninstall` | 撤销最近一次安装（有备份就还原，无备份则删除） |
 | `.\install.ps1 -AgentDir <path>` | 手动指定 agent 目录 |
 
 不带参数直接执行会打印帮助，不做任何写操作。
 
-**备份**放在仓库的 `.backup/` 下（已在 `.gitignore` 里），文件名带时间戳。备份失败会直接中止，不会覆盖原文件。
+**备份**放在仓库的 `.backup/` 下（已在 `.gitignore` 里），文件名是 `APPEND_SYSTEM.<目标目录标识>.<时间戳>.md`：带目录标识是为了你用过多个 agent 目录时不会混在一起。备份失败会直接中止，不会覆盖原文件。
+
+`-Uninstall` 是**撤销上一次安装**：有备份就把安装前的文件还原回去（哪怕那个文件是你原本自己的配置，也不会丢）；没有备份才删除。想多往回退一步，就再执行一次。
 
 `-Status` 的三种结果：
 

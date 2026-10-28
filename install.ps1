@@ -48,7 +48,7 @@ pi-acg-persona —— pi 全局二次元人设卡安装器
   .\install.ps1 -List               列出可用的人设卡 id
   .\install.ps1 -Use <name>         安装/切换人设卡（覆盖前自动备份）
   .\install.ps1 -Status             报告当前生效的人设卡
-  .\install.ps1 -Uninstall          卸载（先备份，再删除）
+  .\install.ps1 -Uninstall          卸载（有备份则还原最近一次，否则删除）
 
 可选:
   -AgentDir <path>                  指定 pi agent 目录
@@ -124,6 +124,11 @@ function Build-Content([string]$Name) {
     return ($parts -join "`n")
 }
 
+function Get-TargetTag([string]$Target) {
+    $dir = (Split-Path -Parent $Target).TrimEnd('\', '/')
+    return (Get-Sha256 $dir.ToLowerInvariant()).Substring(0, 8)
+}
+
 function Backup-Target([string]$Target) {
     if (-not (Test-Path -LiteralPath $Target)) { return $null }
     $backupDir = Join-Path $script:RepoRoot '.backup'
@@ -131,7 +136,7 @@ function Backup-Target([string]$Target) {
         New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
     }
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-    $dest = Join-Path $backupDir "APPEND_SYSTEM.$stamp.md"
+    $dest = Join-Path $backupDir "APPEND_SYSTEM.$(Get-TargetTag $Target).$stamp.md"
     Copy-Item -LiteralPath $Target -Destination $dest -Force
     if (-not (Test-Path -LiteralPath $dest)) {
         throw "备份失败，已中止，未改动任何文件: $dest"
@@ -219,17 +224,45 @@ function Invoke-Status {
     }
 }
 
+function Get-NewestBackup([string]$Target) {
+    $backupDir = Join-Path $script:RepoRoot '.backup'
+    if (-not (Test-Path -LiteralPath $backupDir)) { return $null }
+    $pattern = "APPEND_SYSTEM.$(Get-TargetTag $Target).*.md"
+    $latest = Get-ChildItem -LiteralPath $backupDir -Filter $pattern -File |
+        Sort-Object Name -Descending |
+        Select-Object -First 1
+    if (-not $latest) { return $null }
+    return $latest.FullName
+}
+
 function Invoke-Uninstall {
     $target = Join-Path (Resolve-AgentDir) $script:TargetName
     if (-not (Test-Path -LiteralPath $target)) {
         Write-Host '当前没有安装任何东西，无需卸载。'
         return
     }
-    $backup = Backup-Target $target
+
+    $previous = Get-NewestBackup $target
+    if ($previous) {
+        # 撤销上一次安装：还原到安装前的文件，而不是直接删掉用户原本的内容
+        Copy-Item -LiteralPath $previous -Destination $target -Force
+        Remove-Item -LiteralPath $previous -Force   # 备份已被消费，避免重复回退到同一个状态
+        Write-Host '已还原到安装前的文件（撤销最近一次安装）。'
+        Write-Host "  从: $previous"
+        Write-Host "  到: $target"
+        Write-Host ''
+        Write-Host ' 再执行一次本命令可以继续往前回退一步。'
+        return
+    }
+
+    if (-not (Get-CurrentMarkerName (Read-Text $target))) {
+        Write-Host '没有可回退的备份了，当前文件也不是本工具生成的，已原样保留。'
+        Write-Host "  如需删除请手动处理: $target"
+        return
+    }
+
     Remove-Item -LiteralPath $target -Force
-    Write-Host '已卸载。'
-    Write-Host "  备份: $backup"
-    Write-Host ' 要恢复的话，把备份文件复制回上面的目标路径即可。'
+    Write-Host '已卸载（无历史备份，人设文件已删除）。'
 }
 
 # ---------------------------------------------------------------- dispatch
