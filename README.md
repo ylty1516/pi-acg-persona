@@ -36,6 +36,8 @@ pi-acg-persona/
 │   ├── example.md        # 示例卡「小满」：抄格式用的
 │   └── einx.md           # 实用卡「爱因克斯」：主从关系 + 句尾「喵」+ 傲娇调侃 + 语音层 + 三模式
 ├── wallpaper/            # 终端背景图 + 设置脚本（可选）
+├── extensions/           # pi 扩展（可选）
+│   └── einx-breath.ts    # 把工作指示器换成柔和呼吸点
 ├── persona.template.md   # 空白骨架，抄它写新卡
 ├── install.ps1           # 安装 / 切换 / 查询 / 卸载
 └── docs/                 # 设计说明
@@ -136,6 +138,45 @@ cd wallpaper
 > 脚本用 `UTF8Encoding($false)` 写，并且写失败会自动从备份回滚。
 
 改完要**完全关闭 Windows Terminal 再打开**，关标签页不算。
+
+## 思考呼吸指示器（可选）
+
+pi 流的流式工作指示器默认是 braille 旋转帧（`⠋⠙⠹⠸`），视觉上很吵。
+pi 提供了 `ctx.ui.setWorkingIndicator({ frames, intervalMs })`，可以把帧换成自己的。
+
+`extensions/einx-breath.ts` 就是干这个的：
+
+```
+字符  ·  ·  •  •  ●  ●  •  •
+颜色  暗紫  暗紫  中紫  樱花 樱花 中紫  暗紫  暗紫
+```
+
+8 帧 × 180ms = 一个完整呼吸约 1.44 秒。
+
+### 安装
+
+把文件复制到 pi 的扩展目录，新开会话自动加载：
+
+```powershell
+copy extensions\einx-breath.ts "$env:USERPROFILE\.pi\agent\extensions\"
+```
+
+如果 `PI_CODING_AGENT_DIR` 指向别处，就放到那个目录下的 `extensions/`。
+
+### 命令
+
+| 命令 | 作用 |
+|---|---|
+| `/breath` | 看当前状态 |
+| `/breath fast` | 120ms |
+| `/breath slow` | 260ms |
+| `/breath off` | 关掉，用回 pi 原生 spinner |
+| `/breath reset` | 恢复默认 180ms |
+
+### 两个实现细节
+
+- 颜色取的是主题 token（`accent` / `border` / `borderMuted`），不是写定的色值——换主题会自动跟着变。
+- **色阶必须单调**。如果把 `dim` 拼进色阶开头会出问题：`dim` 比 `borderMuted` 亮，动画会“先暗一下再亮”，变成抽一下。
 
 ## 和 AGENTS.md 的分工
 
